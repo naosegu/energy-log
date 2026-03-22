@@ -105,7 +105,7 @@ textarea {
 
 .text-area {
   width: 100%;
-  min-height: 90px;
+  min-height: 72px;
   padding: 12px 14px;
   border: 1px solid #c8cec5;
   border-radius: 12px;
@@ -200,11 +200,7 @@ textarea {
 }
 
 .list-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 16px;
+  padding: 10px 14px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fcfcfb;
@@ -218,6 +214,24 @@ textarea {
   border-left: 6px solid var(--discharge);
 }
 
+.item-main {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+
+.item-top,
+.item-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-top {
+  align-items: flex-start;
+}
+
 .item-type,
 .item-meta {
   margin: 0;
@@ -225,15 +239,34 @@ textarea {
 }
 
 .item-type {
-  margin-bottom: 6px;
   font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.list-item h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+
+.item-meta {
+  flex-shrink: 0;
+  font-size: 0.92rem;
+}
+
+.item-actions {
+  flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
 .inline-button {
   border: 1px solid #c8cec5;
   border-radius: 999px;
   background: #fff;
-  padding: 8px 14px;
+  padding: 5px 10px;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
@@ -247,8 +280,14 @@ textarea {
   display: none !important;
 }
 
-@media (max-width: 720px) {
-  .list-item {
+@media (max-width: 560px) {
+  .item-top,
+  .item-bottom {
+    align-items: flex-start;
     flex-direction: column;
+  }
+
+  .item-actions {
+    flex-wrap: wrap;
   }
 }

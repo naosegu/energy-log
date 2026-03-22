@@ -239,8 +239,8 @@ function validateLogInput(body) {
     return 'title is required';
   }
 
-  if (trimmedTitle.length > 100) {
-    return 'title must be 100 characters or fewer';
+  if (trimmedTitle.length > 60) {
+    return 'title must be 60 characters or fewer';
   }
 
   return null;

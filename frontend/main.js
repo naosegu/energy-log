@@ -122,7 +122,7 @@ function bindEvents() {
 }
 
 function updateTitleCount() {
-  titleCount.textContent = `${titleInput.value.length} / 100`;
+  titleCount.textContent = `${titleInput.value.length} / 60`;
 }
 
 function syncTypeButtons() {
@@ -241,14 +241,18 @@ function renderLogs() {
 
       return `
         <article class="list-item ${itemClass}">
-          <div>
-            <p class="item-type">${typeLabel}</p>
-            <h3>${escapeHtml(log.title)}</h3>
-            <p class="item-meta">強さ: ${strengthIcons} / 記録: ${formatDate(log.createdAt)}</p>
-          </div>
-          <div class="item-actions">
-            <button type="button" class="inline-button" data-edit-created-at="${log.createdAt}">編集</button>
-            <button type="button" class="inline-button" data-delete-created-at="${log.createdAt}">削除</button>
+          <div class="item-main">
+            <div class="item-top">
+              <p class="item-type">${typeLabel}</p>
+              <div class="item-actions">
+                <button type="button" class="inline-button" data-edit-created-at="${log.createdAt}">編集</button>
+                <button type="button" class="inline-button" data-delete-created-at="${log.createdAt}">削除</button>
+              </div>
+            </div>
+            <div class="item-bottom">
+              <h3>${escapeHtml(log.title)}</h3>
+              <p class="item-meta">${strengthIcons} / ${formatDate(log.createdAt)}</p>
+            </div>
           </div>
         </article>
       `;

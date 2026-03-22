@@ -33,11 +33,11 @@
             <textarea
               id="title-input"
               class="text-area"
-              maxlength="100"
-              rows="3"
+              maxlength="60"
+              rows="2"
               placeholder="例: 散歩したら頭がすっきりした。"
             ></textarea>
-            <p id="title-count" class="helper-text">0 / 100</p>
+            <p id="title-count" class="helper-text">0 / 60</p>
           </div>
 
           <div class="field">
@@ -99,18 +99,26 @@
           <p class="example-label">記入例</p>
 
           <article class="list-item charge is-example">
-            <div>
-              <p class="item-type">充電</p>
-              <h3>散歩したら頭がすっきりした</h3>
-              <p class="item-meta">強さ: 🔋🔋 / 記入例</p>
+            <div class="item-main">
+              <div class="item-top">
+                <p class="item-type">充電</p>
+              </div>
+              <div class="item-bottom">
+                <h3>散歩したら頭がすっきりした</h3>
+                <p class="item-meta">🔋🔋 / 記入例</p>
+              </div>
             </div>
           </article>
 
           <article class="list-item discharge is-example">
-            <div>
-              <p class="item-type">放電</p>
-              <h3>長めの会議でかなり疲れた</h3>
-              <p class="item-meta">強さ: ⚡⚡⚡ / 記入例</p>
+            <div class="item-main">
+              <div class="item-top">
+                <p class="item-type">放電</p>
+              </div>
+              <div class="item-bottom">
+                <h3>長めの会議でかなり疲れた</h3>
+                <p class="item-meta">⚡⚡⚡ / 記入例</p>
+              </div>
             </div>
           </article>
         </div>
