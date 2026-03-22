@@ -1,9 +1,14 @@
+// CDK の基本機能
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+
+// 利用する AWS サービス定義
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+
+// Lambda コードの配置パスを組み立てる
 import * as path from 'path';
 
 export class InfraStack extends cdk.Stack {
@@ -36,7 +41,7 @@ export class InfraStack extends cdk.Stack {
     // 外部公開する HTTP API
     const httpApi = new apigwv2.HttpApi(this, 'EnergyLogHttpApi', {
       corsPreflight: {
-        allowHeaders: ['Content-Type'],
+        allowHeaders: ['Content-Type', 'x-anon-id'],
         allowMethods: [
           apigwv2.CorsHttpMethod.GET,
           apigwv2.CorsHttpMethod.POST,
