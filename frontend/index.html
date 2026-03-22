@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Energy Log</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <h1>Energy Log</h1>
+        <p>何が自分を回復させて、何が消耗させるのか。まずは軽く記録してみましょう。</p>
+        <p>回復は 🔋充電、消耗は ⚡放電 として記録します。</p>
+      </header>
+
+      <section class="panel">
+        <h2>ログを追加</h2>
+
+        <form id="log-form" class="form-grid">
+          <p id="editing-date" class="helper-text is-hidden"></p>
+
+          <div class="field">
+            <span class="field-label">種類</span>
+            <div id="type-buttons" class="button-row">
+              <button type="button" class="choice-button is-active" data-type="charge">🔋 充電</button>
+              <button type="button" class="choice-button" data-type="discharge">⚡ 放電</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="title-input">出来事</label>
+            <textarea
+              id="title-input"
+              class="text-area"
+              maxlength="100"
+              rows="3"
+              placeholder="例: 散歩したら頭がすっきりした。"
+            ></textarea>
+            <p id="title-count" class="helper-text">0 / 100</p>
+          </div>
+
+          <div class="field">
+            <span class="field-label">強さ</span>
+            <div id="value-buttons" class="button-row">
+              <button type="button" class="choice-button is-active" data-value="1">🔋</button>
+              <button type="button" class="choice-button" data-value="2">🔋🔋</button>
+              <button type="button" class="choice-button" data-value="3">🔋🔋🔋</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="submit-button" type="submit" class="primary-button">追加する</button>
+            <button id="cancel-button" type="button" class="secondary-button is-hidden">編集をやめる</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel summary-panel">
+        <div class="section-head">
+          <h2>サマリー</h2>
+          <p>今日の自分と、ここ数日の流れを見比べてみましょう。</p>
+        </div>
+
+        <div class="summary-stack">
+          <div class="summary-row">
+            <span class="summary-label">今日の収支</span>
+            <strong id="today-balance" class="summary-value">0</strong>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">7日平均</span>
+            <strong id="weekly-average" class="summary-subvalue">0</strong>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">1日前</span>
+            <strong id="balance-yesterday" class="summary-subvalue">0</strong>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">2日前</span>
+            <strong id="balance-two-days-ago" class="summary-subvalue">0</strong>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">3日前</span>
+            <strong id="balance-three-days-ago" class="summary-subvalue">0</strong>
+          </div>
+        </div>
+
+        <p id="summary-note" class="summary-note">まずは1件記録して、自分の流れを見てみましょう。</p>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>ログ一覧</h2>
+        </div>
+
+        <div id="example-block" class="example-block">
+          <p class="example-label">記入例</p>
+
+          <article class="list-item charge is-example">
+            <div>
+              <p class="item-type">充電</p>
+              <h3>散歩したら頭がすっきりした</h3>
+              <p class="item-meta">強さ: 🔋🔋 / 記入例</p>
+            </div>
+          </article>
+
+          <article class="list-item discharge is-example">
+            <div>
+              <p class="item-type">放電</p>
+              <h3>長めの会議でかなり疲れた</h3>
+              <p class="item-meta">強さ: ⚡⚡⚡ / 記入例</p>
+            </div>
+          </article>
+        </div>
+
+        <div id="log-list" class="list"></div>
+      </section>
+    </main>
+
+    <script src="./main.js"></script>
+  </body>
+</html>

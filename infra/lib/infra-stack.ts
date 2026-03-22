@@ -67,7 +67,6 @@ export class InfraStack extends cdk.Stack {
         apigwv2.HttpMethod.POST,
         apigwv2.HttpMethod.PUT,
         apigwv2.HttpMethod.DELETE,
-        apigwv2.HttpMethod.OPTIONS,
       ],
       integration: lambdaIntegration,
     });
@@ -80,7 +79,6 @@ export class InfraStack extends cdk.Stack {
         apigwv2.HttpMethod.POST,
         apigwv2.HttpMethod.PUT,
         apigwv2.HttpMethod.DELETE,
-        apigwv2.HttpMethod.OPTIONS,
       ],
       integration: lambdaIntegration,
     });
