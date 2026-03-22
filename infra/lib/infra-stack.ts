@@ -53,6 +53,13 @@ export class InfraStack extends cdk.Stack {
       },
     });
 
+    // 公開 API への連打を少し抑えるため、既定ステージに軽い throttle を入れる
+    const defaultStage = httpApi.defaultStage?.node.defaultChild as apigwv2.CfnStage;
+    defaultStage.defaultRouteSettings = {
+      throttlingRateLimit: 2,
+      throttlingBurstLimit: 5,
+    };
+
     // API Gateway から Lambda を呼び出すための接続
     const lambdaIntegration = new integrations.HttpLambdaIntegration(
       'EnergyLogLambdaIntegration',
