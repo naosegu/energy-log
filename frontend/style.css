@@ -281,13 +281,37 @@ textarea {
 }
 
 @media (max-width: 560px) {
+  .item-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "type meta"
+      "title title"
+      "actions actions";
+    gap: 8px;
+  }
+
   .item-top,
   .item-bottom {
-    align-items: flex-start;
-    flex-direction: column;
+    display: contents;
+  }
+
+  .item-type {
+    grid-area: type;
+  }
+
+  .item-meta {
+    grid-area: meta;
+    justify-self: end;
+    white-space: nowrap;
+  }
+
+  .list-item h3 {
+    grid-area: title;
   }
 
   .item-actions {
+    grid-area: actions;
+    justify-self: start;
     flex-wrap: wrap;
   }
 }
