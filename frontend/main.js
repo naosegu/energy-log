@@ -7,6 +7,7 @@ const valueButtons = document.querySelector('#value-buttons');
 const titleInput = document.querySelector('#title-input');
 const titleCount = document.querySelector('#title-count');
 const editingDate = document.querySelector('#editing-date');
+const formMessage = document.querySelector('#form-message');
 const submitButton = document.querySelector('#submit-button');
 const cancelButton = document.querySelector('#cancel-button');
 const todayBalance = document.querySelector('#today-balance');
@@ -59,6 +60,7 @@ function bindEvents() {
 
   logForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    clearFormMessage();
 
     const title = titleInput.value.trim();
     if (!title) {
@@ -66,23 +68,28 @@ function bindEvents() {
       return;
     }
 
-    if (editingCreatedAt) {
-      await updateLog({
-        createdAt: editingCreatedAt,
-        type: selectedType,
-        title,
-        value: selectedValue,
-      });
-    } else {
-      await createLog({
-        type: selectedType,
-        title,
-        value: selectedValue,
-      });
-    }
+    try {
+      if (editingCreatedAt) {
+        await updateLog({
+          createdAt: editingCreatedAt,
+          type: selectedType,
+          title,
+          value: selectedValue,
+        });
+      } else {
+        await createLog({
+          type: selectedType,
+          title,
+          value: selectedValue,
+        });
+      }
 
-    resetForm();
-    await loadLogs();
+      resetForm();
+      await loadLogs();
+    } catch (error) {
+      console.error(error);
+      showFormMessage(error.message || 'ログの保存に失敗しました。');
+    }
   });
 
   cancelButton.addEventListener('click', () => {
@@ -98,11 +105,18 @@ function bindEvents() {
 
     const deleteButton = event.target.closest('[data-delete-created-at]');
     if (deleteButton) {
-      await deleteLog(deleteButton.dataset.deleteCreatedAt);
-      if (editingCreatedAt === deleteButton.dataset.deleteCreatedAt) {
-        resetForm();
+      clearFormMessage();
+
+      try {
+        await deleteLog(deleteButton.dataset.deleteCreatedAt);
+        if (editingCreatedAt === deleteButton.dataset.deleteCreatedAt) {
+          resetForm();
+        }
+        await loadLogs();
+      } catch (error) {
+        console.error(error);
+        showFormMessage(error.message || 'ログの削除に失敗しました。');
       }
-      await loadLogs();
     }
   });
 }
@@ -137,6 +151,7 @@ function resetForm() {
   updateTitleCount();
   syncTypeButtons();
   syncValueButtons();
+  clearFormMessage();
 }
 
 function startEdit(createdAt) {
@@ -178,7 +193,7 @@ async function loadLogs() {
 }
 
 async function createLog(payload) {
-  await fetch(`${API_BASE_URL}/logs`, {
+  const response = await fetch(`${API_BASE_URL}/logs`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -186,10 +201,12 @@ async function createLog(payload) {
     },
     body: JSON.stringify(payload),
   });
+
+  await ensureSuccessResponse(response, payload.type);
 }
 
 async function updateLog(payload) {
-  await fetch(`${API_BASE_URL}/logs`, {
+  const response = await fetch(`${API_BASE_URL}/logs`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -197,10 +214,12 @@ async function updateLog(payload) {
     },
     body: JSON.stringify(payload),
   });
+
+  await ensureSuccessResponse(response);
 }
 
 async function deleteLog(createdAt) {
-  await fetch(`${API_BASE_URL}/logs`, {
+  const response = await fetch(`${API_BASE_URL}/logs`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -208,6 +227,8 @@ async function deleteLog(createdAt) {
     },
     body: JSON.stringify({ createdAt }),
   });
+
+  await ensureSuccessResponse(response);
 }
 
 function renderLogs() {
@@ -331,6 +352,39 @@ function setSummaryMetric(element, value) {
     <span class="summary-number-text">${formatSignedNumber(value)}</span>
     <span class="summary-number-icon">${formatSummaryIcon(value)}</span>
   `;
+}
+
+async function ensureSuccessResponse(response, type) {
+  if (response.ok) {
+    return;
+  }
+
+  let data = null;
+  try {
+    data = await response.json();
+  } catch (error) {
+    data = null;
+  }
+
+  if (response.status === 429 && type === 'charge') {
+    throw new Error('今日は充電ログを3件まで追加できます。');
+  }
+
+  if (response.status === 429 && type === 'discharge') {
+    throw new Error('今日は放電ログを3件まで追加できます。');
+  }
+
+  throw new Error(data?.message || '通信に失敗しました。');
+}
+
+function showFormMessage(message) {
+  formMessage.textContent = message;
+  formMessage.classList.remove('is-hidden');
+}
+
+function clearFormMessage() {
+  formMessage.textContent = '';
+  formMessage.classList.add('is-hidden');
 }
 
 function formatDate(value) {

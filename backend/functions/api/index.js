@@ -17,9 +17,6 @@ const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.TABLE_NAME;
 
 exports.handler = async (event) => {
-  // API Gateway から渡されたリクエスト内容をログに出す
-  console.log('event:', JSON.stringify(event, null, 2));
-
   const method = event.requestContext?.http?.method;
   const path = event.rawPath;
 
@@ -36,6 +33,14 @@ exports.handler = async (event) => {
     // 1件のログを作成して DynamoDB に保存する
     if (method === 'POST' && path === '/logs') {
       const body = JSON.parse(event.body ?? '{}');
+      const validationError = validateLogInput(body);
+      if (validationError) {
+        return jsonResponse(400, {
+          message: validationError,
+        });
+      }
+
+      const anonId = event.headers?.['x-anon-id'] || 'demo-user';
 
       const now = new Date();
       const createdAt = now.toISOString();
@@ -44,9 +49,33 @@ exports.handler = async (event) => {
         new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).getTime() / 1000
       );
 
+      // 同じ日の同じ種類は 3 件までに制限する
+      const existingLogs = await docClient.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: 'anonId = :anonId',
+          ExpressionAttributeValues: {
+            ':anonId': anonId,
+          },
+          ScanIndexForward: false,
+          Limit: 20,
+        })
+      );
+
+      const todayKey = toDateKey(now);
+      const sameTypeCountToday = (existingLogs.Items ?? []).filter((item) => {
+        return toDateKey(new Date(item.createdAt)) === todayKey && item.type === body.type;
+      }).length;
+
+      if (sameTypeCountToday >= 3) {
+        return jsonResponse(429, {
+          message: `${body.type} logs are limited to 3 per day`,
+        });
+      }
+
       const item = {
         // いまは匿名ユーザー ID をヘッダで受け取る
-        anonId: event.headers?.['x-anon-id'] || 'demo-user',
+        anonId,
         createdAt,
         type: body.type,
         title: body.title,
@@ -91,6 +120,19 @@ exports.handler = async (event) => {
     // 既存ログの type / title / value を更新する
     if (method === 'PUT' && path === '/logs') {
       const body = JSON.parse(event.body ?? '{}');
+      if (typeof body.createdAt !== 'string' || !body.createdAt.trim()) {
+        return jsonResponse(400, {
+          message: 'createdAt is required',
+        });
+      }
+
+      const validationError = validateLogInput(body);
+      if (validationError) {
+        return jsonResponse(400, {
+          message: validationError,
+        });
+      }
+
       const anonId = event.headers?.['x-anon-id'] || 'demo-user';
 
       const result = await docClient.send(
@@ -123,6 +165,12 @@ exports.handler = async (event) => {
     // 既存ログを 1 件削除する
     if (method === 'DELETE' && path === '/logs') {
       const body = JSON.parse(event.body ?? '{}');
+      if (typeof body.createdAt !== 'string' || !body.createdAt.trim()) {
+        return jsonResponse(400, {
+          message: 'createdAt is required',
+        });
+      }
+
       const anonId = event.headers?.['x-anon-id'] || 'demo-user';
 
       await docClient.send(
@@ -167,4 +215,33 @@ function jsonResponse(statusCode, body) {
     },
     body: JSON.stringify(body),
   };
+}
+
+function toDateKey(date) {
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+function validateLogInput(body) {
+  if (!['charge', 'discharge'].includes(body.type)) {
+    return 'type must be charge or discharge';
+  }
+
+  if (![1, 2, 3].includes(Number(body.value))) {
+    return 'value must be 1, 2, or 3';
+  }
+
+  if (typeof body.title !== 'string') {
+    return 'title is required';
+  }
+
+  const trimmedTitle = body.title.trim();
+  if (!trimmedTitle) {
+    return 'title is required';
+  }
+
+  if (trimmedTitle.length > 100) {
+    return 'title must be 100 characters or fewer';
+  }
+
+  return null;
 }
