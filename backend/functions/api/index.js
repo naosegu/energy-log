@@ -5,6 +5,8 @@ const {
   DynamoDBDocumentClient,
   PutCommand,
   QueryCommand,
+  UpdateCommand,
+  DeleteCommand,
 } = require('@aws-sdk/lib-dynamodb');
 
 // Lambda の再利用時に使い回せるよう、DynamoDB クライアントは関数の外で初期化する
@@ -83,6 +85,59 @@ exports.handler = async (event) => {
 
       return jsonResponse(200, {
         items: result.Items ?? [],
+      });
+    }
+
+    // 既存ログの type / title / value を更新する
+    if (method === 'PUT' && path === '/logs') {
+      const body = JSON.parse(event.body ?? '{}');
+      const anonId = event.headers?.['x-anon-id'] || 'demo-user';
+
+      const result = await docClient.send(
+        new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            anonId,
+            createdAt: body.createdAt,
+          },
+          UpdateExpression: 'SET #type = :type, title = :title, #value = :value',
+          ExpressionAttributeNames: {
+            '#type': 'type',
+            '#value': 'value',
+          },
+          ExpressionAttributeValues: {
+            ':type': body.type,
+            ':title': body.title,
+            ':value': body.value,
+          },
+          ReturnValues: 'ALL_NEW',
+        })
+      );
+
+      return jsonResponse(200, {
+        message: 'log updated',
+        item: result.Attributes,
+      });
+    }
+
+    // 既存ログを 1 件削除する
+    if (method === 'DELETE' && path === '/logs') {
+      const body = JSON.parse(event.body ?? '{}');
+      const anonId = event.headers?.['x-anon-id'] || 'demo-user';
+
+      await docClient.send(
+        new DeleteCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            anonId,
+            createdAt: body.createdAt,
+          },
+        })
+      );
+
+      return jsonResponse(200, {
+        message: 'log deleted',
+        createdAt: body.createdAt,
       });
     }
 
